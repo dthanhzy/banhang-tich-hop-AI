@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Loa - Chat AI & Custom Loa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /*CSS (GLASSMORPHISM)*/
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg-dark: #0b1020;
+            --bg-card: rgba(20, 26, 51, 0.8);
+            --text-white: #f8fafc;
+            --text-gray: #94a3b8;
+            --border-card: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b1020, #1e1b4b);
+            color: var(--text-white);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /*Header*/
+        header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(11, 16, 32, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-card);
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto;
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 25px; }
+        .nav-links a { color: var(--text-gray); font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover { color: var(--text-white); }
+
+        /*Hero Section*/
+        .hero {
+            padding: 150px 20px 80px;
+            text-align: center;
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.1), transparent 50%);
+        }
+        .hero h1 {
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 15px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p { color: var(--text-gray); max-width: 600px; margin: 0 auto 30px; }
+
+        .btn {
+            display: inline-block; padding: 12px 25px; border-radius: 8px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s; border: none;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
+
+        /*Products Grid (Static HTML rendering)*/
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+        .section-title { font-size: 2rem; text-align: center; margin-bottom: 40px; position: relative; }
+        .section-title::after {
+            content: ''; display: block; width: 80px; height: 4px;
+            background: var(--primary); margin: 10px auto; border-radius: 2px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary);
+        }
+        .product-img {
+            height: 200px; background-size: cover; background-position: center;
+        }
+        .product-info { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-title { font-size: 1.2rem; margin-bottom: 10px; color: var(--text-white); }
+        .product-desc { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 15px; }
+        .product-price { font-size: 1.4rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
+
+        /*Footer*/
+        footer {
+            background: #050814; padding: 40px 20px;
+            text-align: center; color: var(--text-gray);
+            border-top: 1px solid var(--border-card);
+            margin-top: 50px;
+        }
+
+        /*FLOATING CHAT WIDGET (Khung chat góc màn hình)*/
+        .chat-toggle {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 65px; height: 65px; background: var(--primary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.5rem; cursor: pointer; z-index: 9999;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.5); border: none;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .chat-toggle:hover { transform: scale(1.1); background: var(--primary-dark); }
+
+        .chat-window {
+            position: fixed; bottom: 100px; right: 30px;
+            width: 380px; max-width: 90vw; height: 500px;
+            background: var(--bg-card); backdrop-filter: blur(15px);
+            border: 1px solid var(--border-card); border-radius: 20px;
+            z-index: 9998; display: none; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        .chat-header {
+            background: var(--primary); padding: 15px; color: white;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-body {
+            flex: 1; overflow-y: auto; padding: 15px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .msg {
+            max-width: 80%; padding: 10px 15px; border-radius: 15px;
+            font-size: 0.9rem; line-height: 1.4; word-wrap: break-word;
+        }
+        .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .msg-ai { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-card); border-bottom-left-radius: 4px; }
+
+        .chat-footer { padding: 10px; border-top: 1px solid var(--border-card); display: flex; gap: 10px; }
+        .chat-input { flex: 1; background: rgba(0, 0, 0, 0.2); border: none; padding: 10px; border-radius: 8px; color: white; outline: none; }
+        .btn-send { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
+        .btn-send:hover { background: var(--primary-dark); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">Hệ Thống <span>Loa</span></div>
+            <div class="nav-links">
+                <a href="#products">Sản Phẩm</a>
+                <a href="#features">Tính Năng AI</a>
+                <a href="#contact">Liên Hệ</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Custom Loa Theo Yêu Cầu & Tư Vấn AI</h1>
+        <p>Hệ thống loa cao cấp kết hợp công nghệ AI tiên tiến. Nhận tư vấn custom loa theo không gian và chẩn đoán sự cố kỹ thuật một cách chính xác, nhanh chóng.</p>
+        <button class="btn btn-primary" onclick="document.getElementById('products').scrollIntoView()">Khám Phá Sản Phẩm</button>
+    </section>
+
+    <!-- Products Section -->
+    <div class="container" id="products">
+        <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
+        <div class="product-grid">
+            
+            <!-- Card 1 -->
+            <div class="product-card">
+                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1542718873-663c1d64b0d9?auto=format&fit=crop&w=500&q=60');"></div>
+                <div class="product-info">
+                    <h3 class="product-title">Loa Bookshelf Karaoke BT-05</h3>
+                    <p class="product-desc">Thiết kế tinh tế, công suất 150W, Bluetooth 5.2, âm thanh trong vắt, bass mạnh mẽ.</p>
+                    <div class="product-price">3.500.000 VNĐ</div>
+                    <button class="btn btn-primary" onclick="askAbout('Loa Bookshelf Karaoke BT-05')">Tư vấn AI chọn loại</button>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="product-card">
+                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1593611011665-4394d0e9cf6c?auto=format&fit=crop&w=500&q=60');"></div>
+                <div class="product-info">
+                    <h3 class="product-title">Loa Subwoofer Siêu Sâu S-900</h3>
+                    <p class="product-desc">Loa sub cực kỳ mạnh mẽ, độ sâu âm thấp tuyệt vời, phù hợp rạp hát tại gia.</p>
+                    <div class="product-price">5.200.000 VNĐ</div>
+                    <button class="btn btn-primary" onclick="askAbout('Loa Subwoofer Siêu Sâu S-900')">Tư vấn AI chọn loại</button>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="product-card">
+                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1563296520-97b47d5a4b3a?auto=format&fit=crop&w=500&q=60');"></div>
+                <div class="product-info">
+                    <h3 class="product-title">Loa Cột Di Động DC-12</h3>
+                    <p class="product-desc">Loa cột di động tích hợp pin và micro, dễ dàng di chuyển, lý tưởng cho sự kiện outdoor.</p>
+                    <div class="product-price">7.800.000 VNĐ</div>
+                    <button class="btn btn-primary" onclick="askAbout('Loa Cột Di Động DC-12')">Tư vấn AI chọn loại</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <p>&copy; 2024 Hệ Thống Loa AI. All rights reserved.</p>
+        <p>Hotline: 1900.123.456 | Email: support@hethongloa.vn</p>
+    </footer>
+
+    <!-- FLOATING CHAT WIDGET -->
+    <button class="chat-toggle" id="chatToggleBtn" onclick="toggleChat()">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-robot"></i>
+                <span class="font-semibold">AI Support - HTL</span>
+            </div>
+            <button onclick="toggleChat()" class="text-white/80 hover:text-white">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <div class="chat-body" id="chatOutput">
+            <div class="msg msg-ai">
+                Chào bạn! Tôi là AI chuyên gia của Hệ Thống Loa. Tôi có thể giúp bạn:
+                <br><br>
+                1️⃣ Gợi ý mẫu loa phù hợp với không gian & ngân sách.
+                <br>
+                2️⃣ Chẩn đoán sự cố kỹ thuật (kêu cót, không lên nguồn, méo âm thanh...).
+                <br><br>
+                Hỏi tôi bất cứ điều gì nhé!
+            </div>
+        </div>
+
+        <div class="chat-footer">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Nhập câu hỏi..." onkeypress="if(event.key === 'Enter') sendChat()">
+            <button class="btn-send" onclick="sendChat()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        //CẤU HÌNH GEM API KEY
+        //Thay thế bằng API Key
+        const GEMINI_API_KEY = "Nhap key"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        //CƠ SỞ TRI THỨC KỸ THUẬT (RAG LOCAL JS)
+        const knowledgeBase = [
+            {
+                keywords: ["không lên nguồn", "không sáng đèn", "im lặng"],
+                answer: "Kiểm tra adapter nguồn xem có đứt dây hay rò điện không. Nếu đèn LED không sáng, có thể board nguồn trong loa bị burn (cháy). Cần thay board nguồn mới."
+            },
+            {
+                keywords: ["kêu cót", "giòn âm", "tiếng hở"],
+                answer: "Hiện tượng này thường do cuộn voice coil của loa treble hoặc loa bass bị rách, hoặc board phân tần (crossover) bị rò điện. Cách xử lý: tháo loa ra, dùng bút thử điện kiểm tra dòng điện, sau đó thay thế cuộn voice coil hoặc board phân tần."
+            },
+            {
+                keywords: ["méo âm", "distortion", "rùng ranh"],
+                answer: "Âm thanh méo có thể do amply chạy quá công suất (overload), hoặc loa sub bị hụt âm (lõm). Hãy giảm âm lượng xuống 70% và kiểm tra màng loa bass xem có bị lõm hay rách không."
+            },
+            {
+                keywords: ["bluetooth", "không kết nối", "ngắt kết nối"],
+                answer: "Kiểm tra xem loa có ở chế độ Pair (nhấp nháy đèn xanh) không. Nếu đã reset loa (nhấn và giữ nút power 5s) mà vẫn không kết nối được, có thể module bluetooth trên board loa bị lỗi phần cứng, cần thay module bluetooth mới."
+            }
+        ];
+
+        //Hàm tìm kiếm local trước khi gọi AI
+        function searchLocalKnowledge(query) {
+            const qLower = query.toLowerCase();
+            for (let item of knowledgeBase) {
+                if (item.keywords.some(kw => qLower.includes(kw))) {
+                    return item.answer;
+                }
+            }
+            return null;
+        }
+
+        //LOGIC CHAT WIDGET
+        function toggleChat() {
+            const win = document.getElementById('chatWindow');
+            const btn = document.getElementById('chatToggleBtn');
+            if (win.style.display === 'flex') {
+                win.style.display = 'none';
+                btn.style.display = 'flex';
+            } else {
+                win.style.display = 'flex';
+                btn.style.display = 'none';
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        function appendMessage(text, isUser) {
+            const chatBox = document.getElementById('chatOutput');
+            const div = document.createElement('div');
+            div.className = `msg ${isUser ? 'msg-user' : 'msg-ai'}`;
+            div.innerHTML = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage(text, true);
+            input.value = '';
+
+            //1. Kiểm tra local knowledge base trước
+            const localAns = searchLocalKnowledge(text);
+            if (localAns) {
+                appendMessage(localAns, false);
+                return;
+            }
+
+            //2. Nếu không có local, gọi Gemini API
+            appendMessage("<i>Đang kết nối với chuyên gia AI...</i>", false);
+            const typingMsg = document.querySelectorAll('.msg-ai')[document.querySelectorAll('.msg-ai').length - 1];
+
+            try {
+                const systemPrompt = `
+                    Bạn là kỹ thuật viên bán hàng chuyên nghiệp của "Hệ Thống Loa".
+                    Trả lời bằng tiếng Việt thân thiện, dùng emoji.
+                    CHỉ dựa trên các thông tin sản phẩm sau:
+                    - Loa Bookshelf Karaoke BT-05 (3.5tr): Bluetooth 5.2, công suất 150W, âm thanh trong vắt.
+                    - Loa Subwoofer S-900 (5.2tr): âm bass sâu sắc, mạnh mẽ.
+                    - Loa Cột Di Động DC-12 (7.8tr): tích hợp pin và micro, dễ di chuyển.
+                    KHÔNG được bốc tương tượng thông tin kỹ thuật nếu không có trong yêu cầu.
+                `;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `${systemPrompt}\n\nKhách hàng hỏi: ${text}`
+                            }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Lỗi không có phản hồi từ AI.";
+                
+                //Cập nhật tin nhắn cuối
+                typingMsg.innerHTML = aiText;
+
+            } catch (error) {
+                typingMsg.innerHTML = "Lỗi kết nối AI. Vui lòng kiểm tra lại API Key hoặc thử lại sau.";
+            }
+        }
+
+        function askAbout(productName) {
+            toggleChat();
+            document.getElementById('chatInput').value = `Giúp tôi tư vấn về sản phẩm ${productName}.`;
+            sendChat();
+        }
+    </script>
+</body>
+</html>
