@@ -327,14 +327,14 @@
             appendMessage(text, true);
             input.value = '';
 
-            //1. Kiểm tra local knowledge base trước
+            //1.Kiểm tra local knowledge base trước
             const localAns = searchLocalKnowledge(text);
             if (localAns) {
                 appendMessage(localAns, false);
                 return;
             }
 
-            //2. Nếu không có local, gọi Gemini API
+            //2.Nếu không có local, gọi Gemini API
             appendMessage("<i>Đang kết nối với chuyên gia AI...</i>", false);
             const typingMsg = document.querySelectorAll('.msg-ai')[document.querySelectorAll('.msg-ai').length - 1];
 
